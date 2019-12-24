@@ -2,6 +2,7 @@
 #include <QTabBar>
 #include <QIcon>
 #include <QStackedLayout>
+#include <QFrame>
 #include "customtabbar.h"
 #include "multiplerowstabbar.h"
 
@@ -10,21 +11,25 @@ MultipleRowsTabBar::MultipleRowsTabBar(int rows, QWidget *parent) : QWidget(pare
     if(rows <= 0)
         return;
 
-    QVBoxLayout *mainLay = new QVBoxLayout(this);
+    _mainLay = new QVBoxLayout(this);
+    _mainLay->setSpacing(0);
+	
     for(auto i = 0; i < rows; i++)
     {
-        QHBoxLayout *tabLay = new QHBoxLayout;
         CustomTabBar *tb = new CustomTabBar(this);
         connect(tb, &CustomTabBar::tabBarClicked, this, &MultipleRowsTabBar::currentChange);
         connect(tb, &CustomTabBar::currentByWheelChanged, this, &MultipleRowsTabBar::currentChange);
         connect(tb, &CustomTabBar::currentByKeyChanged, this, &MultipleRowsTabBar::currentChangeByKey);
-        tabLay->addWidget(tb);
         _tabs.append(tb);
-        mainLay->addLayout(tabLay);
+        _mainLay->addWidget(tb);
     }
 
+    _tabsFrame = new QFrame(this);
+    _tabsFrame->setObjectName("multipleTabBarFrame");
+    _tabsFrame->setStyleSheet(_tabsFrameStyleSheet);
     _stack = new QStackedLayout;
-    mainLay->addLayout(_stack);
+	_tabsFrame->setLayout(_stack);
+	_mainLay->addWidget(_tabsFrame);
 }
 
 void MultipleRowsTabBar::resetTabs()
@@ -77,7 +82,9 @@ void MultipleRowsTabBar::currentTabChange(CustomTabBar *bar, int index)
 
     bar->setCurrentIndex(index);
 	bar->setStyleSheet(_activeStyleSheet);
-    changeStack(getStackIndex(_tabs.indexOf(bar), index));
+    int row = _tabs.indexOf(bar);
+    rowToDownLayout(bar);
+    changeStack(getStackIndex(row, index));
 }
 
 int MultipleRowsTabBar::getStackIndex(int row, int index)
@@ -87,6 +94,20 @@ int MultipleRowsTabBar::getStackIndex(int row, int index)
         cntTabs += _tabs.at(i)->count();
 
     return cntTabs + index;
+}
+
+void MultipleRowsTabBar::rowToDownLayout(CustomTabBar *bar)
+{
+    bool sameRow = false;
+
+    if(CustomTabBar *b = dynamic_cast<CustomTabBar *>(_mainLay->itemAt(_mainLay->count()-2)->widget()))
+        sameRow = bar == b;
+
+    if(!sameRow)
+    {
+        _mainLay->removeWidget(bar);
+        _mainLay->insertWidget(_mainLay->count()-1, bar);
+    }
 }
 
 void MultipleRowsTabBar::changeStack(int index)

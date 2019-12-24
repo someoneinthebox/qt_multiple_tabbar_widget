@@ -5,6 +5,8 @@
 
 class CustomTabBar;
 class QStackedLayout;
+class QVBoxLayout;
+class QFrame;
 /*!
  * \brief The MultipleRowsTabBar class
  * Multiple QTabBar Widget
@@ -13,33 +15,30 @@ class MultipleRowsTabBar : public QWidget
 {
     Q_OBJECT
 
+	QFrame *_tabsFrame = nullptr;
+	QVBoxLayout *_mainLay = nullptr;	
     QStackedLayout *_stack = nullptr;
     QVector<CustomTabBar *> _tabs;
 	
 	QString _activeStyleSheet = "QTabBar::tab { "
-                                "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
-                                "stop: 0 #E1E1E1, stop: 0.4 #DDDDDD, "
-                                "stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3); "
+								"background-color: palette(button);"
                                 "border: 1px solid #C4C4C3; "
-                                "border-top-left-radius: 2px; "
-                                "border-top-right-radius: 2px; "
                                 "padding: 3px; } "
                                 "QTabBar::tab:hover, QTabBar::tab:selected { "
-                                "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
-                                "stop: 0 #fafafa, stop: 0.4 #f4f4f4, "
-                                "stop: 0.5 #e7e7e7, stop: 1.0 #fafafa); } ";
+                                "background-color: palette(light); } "
+                                "QTabBar::tab:selected { border-bottom: none; }";
     QString _inactiveStyleSheet = "QTabBar::tab, QTabBar::tab:selected { "
-                                  "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
-                                  "stop: 0 #E1E1E1, stop: 0.4 #DDDDDD, "
-                                  "stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3); "
+                                  "background-color: palette(button);"
                                   "border: 1px solid #C4C4C3; "
-                                  "border-top-left-radius: 2px; "
-                                  "border-top-right-radius: 2px; "
                                   "padding: 3px; } "
                                   "QTabBar::tab:hover { "
-                                  "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
-                                  "stop: 0 #fafafa, stop: 0.4 #f4f4f4, "
-                                  "stop: 0.5 #e7e7e7, stop: 1.0 #fafafa); }";
+                                  "background-color: palette(light); }";		
+
+    QString _tabsFrameStyleSheet = "QFrame#multipleTabBarFrame { "
+                                   "border-left: 1px solid #C4C4C3;"
+                                   "border-right: 1px solid #C4C4C3;"
+                                   "border-bottom: 1px solid #C4C4C3;"
+                                   "border-top: none; }";							  
 
     /*!
      * \brief resetTabs
@@ -61,6 +60,11 @@ class MultipleRowsTabBar : public QWidget
      * Get index for QStackLayout
      */
     int getStackIndex(int row, int index);
+    /*!
+     * \brief rowToDownLayout
+     * Change tabbar order if bar at top in layout
+     */
+    void rowToDownLayout(CustomTabBar *bar);	
 
 protected:
     /*!
@@ -92,6 +96,9 @@ public:
      */
     void addWidget(QWidget *widget);
     void setCurrentTab(int row, int index);
+    void setCustomActiveStyleSheet(const QString &sheet) { _activeStyleSheet = sheet; }
+    void setCustomInActiveStyleSheet(const QString &sheet) { _inactiveStyleSheet = sheet; }
+    void setCustomFrameStyleSheet(const QString &sheet) { _tabsFrameStyleSheet = sheet; }	
 
 private slots:
     /*!
