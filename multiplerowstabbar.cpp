@@ -18,10 +18,7 @@ MultipleRowsTabBar::MultipleRowsTabBar(int rows, QWidget *parent) : QWidget(pare
         connect(tb, &CustomTabBar::tabBarClicked, this, &MultipleRowsTabBar::currentChange);
         connect(tb, &CustomTabBar::currentByWheelChanged, this, &MultipleRowsTabBar::currentChange);
         connect(tb, &CustomTabBar::currentByKeyChanged, this, &MultipleRowsTabBar::currentChangeByKey);
-        tb->setStyleSheet("QTabBar::tab:first { max-width: 0px; }");
-        tb->addTab("");
         tabLay->addWidget(tb);
-        tabLay->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding));
         _tabs.append(tb);
         mainLay->addLayout(tabLay);
     }
@@ -33,7 +30,10 @@ MultipleRowsTabBar::MultipleRowsTabBar(int rows, QWidget *parent) : QWidget(pare
 void MultipleRowsTabBar::resetTabs()
 {
     for(QTabBar *b : _tabs)
+	{
+		b->setStyleSheet(_inactiveStyleSheet);
         b->setCurrentIndex(0);
+	}
 }
 
 void MultipleRowsTabBar::addTab(int row, const QIcon &icon, const QString &text, QWidget *widget)
@@ -75,19 +75,18 @@ void MultipleRowsTabBar::currentTabChange(CustomTabBar *bar, int index)
     if(index < 0 || index >= bar->count())
         return;
 
-    int selectedIndex = (index < 1) ? 1 : index;
-
-    bar->setCurrentIndex(selectedIndex);
-    changeStack(getStackIndex(_tabs.indexOf(bar), selectedIndex));
+    bar->setCurrentIndex(index);
+	bar->setStyleSheet(_activeStyleSheet);
+    changeStack(getStackIndex(_tabs.indexOf(bar), index));
 }
 
 int MultipleRowsTabBar::getStackIndex(int row, int index)
 {
     int cntTabs = 0;
     for(auto i = 0; i < row; i++)
-        cntTabs += _tabs.at(i)->count()-1;
+        cntTabs += _tabs.at(i)->count();
 
-    return cntTabs + (index-1);
+    return cntTabs + index;
 }
 
 void MultipleRowsTabBar::changeStack(int index)
@@ -121,7 +120,7 @@ void MultipleRowsTabBar::currentChangeByKey(int key)
                 resetTabs();
                 CustomTabBar *bar = _tabs.at(currentTabRow-1);
                 bar->setFocus();
-                currentTabChange(bar, 1);
+                currentTabChange(bar, 0);
             }
             break;
         }
@@ -132,7 +131,7 @@ void MultipleRowsTabBar::currentChangeByKey(int key)
                 resetTabs();
                 CustomTabBar *bar = _tabs.at(currentTabRow+1);
                 bar->setFocus();
-                currentTabChange(bar, 1);
+                currentTabChange(bar, 0);
             }
             break;
         }
@@ -144,15 +143,12 @@ void MultipleRowsTabBar::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
 
-    if(_tabs.size() > 0)
-    {
-        for(CustomTabBar *b : _tabs)
-        {
-            int maxWidth = 0;
-            for(auto i = 0; i < b->count(); i++)
-                maxWidth += b->tabRect(i).width();
+    int maximumWidth = 0;
+	
+    for(CustomTabBar *b : _tabs)
+        if(maximumWidth < b->width())
+            maximumWidth = b->width();
 
-            b->setMaximumWidth(maxWidth);
-        }
-    }
+    for(CustomTabBar *b : _tabs)
+        b->setMinimumWidth(maximumWidth);
 }

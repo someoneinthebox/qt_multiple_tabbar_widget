@@ -17,7 +17,7 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 public:
-    explicit CustomTabBar(QWidget *parent) : QTabBar(parent){}
+    explicit CustomTabBar(QWidget *parent) : QTabBar(parent){ setUsesScrollButtons(false); }
     ~CustomTabBar(){}
 
 signals:
