@@ -20,4 +20,4 @@ multiTab->addTab(1, QIcon(":/images/RfidReader.png"), tr("RFID"), _rfidWidget);
 multiTab->addTab(1, QIcon(":/images/barcode-2d.png"), tr("QR"), _qrWidget);
 ```
 
-[Example image](https://sun9-27.userapi.com/c205628/v205628501/1be05/4l_7HmN4VVE.jpg)
+[Example image](https://sun9-69.userapi.com/c855220/v855220941/1b19f1/DQsRvCa5xkI.jpg)
